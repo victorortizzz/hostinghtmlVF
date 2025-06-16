@@ -29,7 +29,7 @@
       width: 100%;
       height: 100%;
       background: #000;
-      border-radius: 9999px; /* máximo redondeado */
+      border-radius: 9999px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -42,7 +42,7 @@
       font-variation-settings: "wght" 900;
       color: white;
       text-align: center;
-      white-space: nowrap;
+      white-space: pre-wrap;
       outline: none;
       border: none;
       background: transparent;
@@ -52,7 +52,7 @@
 
     #slider-wrapper {
       position: absolute;
-      bottom: 1.2rem; /* cerca del borde inferior */
+      bottom: 1.2rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -134,7 +134,7 @@
 
   <script>
     const allowedChars = new Set(
-      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÄÉÍÓÔÕÖÚÜÝáäéíóôõöúüýĀāĄąĆćČčĎďĒēĖėĘęĚěĢģĪīĮįĶķĹĺĻļĽľŁłŃńŅņŇňŌōŐőŔŕŖŗŘřŚśŠšŤťŪūŰűŲųŹźŻżŽž¿?!¡!-—.,:;‘’“”„'
+      '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÄÉÍÓÔÕÖÚÜÝáäéíóôõöúüýĀāĄąĆćČčĎďĒēĖėĘęĚěĢģĪīĮįĶķĹĺĻļĽľŁłŃńŅņŇňŌōŐőŔŕŖŗŘřŚśŠšŤťŪūŰűŲųŹźŻżŽž¿?!¡!-—.,:;‘’“”„ \n'
     );
 
     const textBox = document.getElementById('text-box');
@@ -155,15 +155,58 @@
     });
 
     textBox.addEventListener('keydown', (e) => {
+      const text = textBox.innerText;
+      const lineBreaks = (text.match(/\n/g) || []).length;
+
+      // Bloquear caracteres no permitidos
       if (e.key.length === 1 && !allowedChars.has(e.key)) {
+        e.preventDefault();
+        return;
+      }
+
+      // Limitar a 150 caracteres
+      if (text.length >= 150 && e.key !== 'Backspace' && e.key !== 'Delete' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        return;
+      }
+
+      // Limitar a 4 saltos de línea
+      if (e.key === 'Enter' && lineBreaks >= 4) {
         e.preventDefault();
       }
     });
 
+    textBox.addEventListener('input', () => {
+      let text = textBox.innerText;
+      const lines = text.split('\n');
+
+      // Limitar saltos de línea
+      if (lines.length > 5) {
+        text = lines.slice(0, 5).join('\n');
+      }
+
+      // Limitar caracteres
+      if (text.length > 150) {
+        text = text.slice(0, 150);
+      }
+
+      // Restaurar contenido limpio si se excedió
+      textBox.innerText = text;
+
+      // Restaurar cursor al final
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(textBox);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+
     textBox.addEventListener('paste', (e) => {
       e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text');
-      const filtered = Array.from(text).filter(char => allowedChars.has(char)).join('');
+      const clipboard = (e.clipboardData || window.clipboardData).getData('text');
+      let filtered = Array.from(clipboard).filter(char => allowedChars.has(char)).join('');
+      filtered = filtered.slice(0, 150 - textBox.innerText.length);
       document.execCommand('insertText', false, filtered);
     });
 

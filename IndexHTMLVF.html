@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title> Type your favourite scent...</title>
+  <title>Type your favourite scent...</title>
   <style>
     @font-face {
       font-family: 'Larida VF';
@@ -142,12 +142,12 @@
     const weightValue = document.getElementById('weight-value');
 
     function updateWeight(val) {
-      textBox.style.fontVariationSettings = "wght" ${val};
+      textBox.style.fontVariationSettings = `"wght" ${val}`;
       weightValue.textContent = val;
 
       const percent = (val - weightSlider.min) / (weightSlider.max - weightSlider.min);
       const offset = percent * weightSlider.offsetWidth;
-      weightValue.style.left = ${offset}px;
+      weightValue.style.left = `${offset}px`;
     }
 
     weightSlider.addEventListener('input', (e) => {
@@ -158,19 +158,16 @@
       const text = textBox.innerText;
       const lineBreaks = (text.match(/\n/g) || []).length;
 
-      // Bloquear caracteres no permitidos
       if (e.key.length === 1 && !allowedChars.has(e.key)) {
         e.preventDefault();
         return;
       }
 
-      // Limitar a 150 caracteres
       if (text.length >= 150 && e.key !== 'Backspace' && e.key !== 'Delete' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         return;
       }
 
-      // Limitar a 4 saltos de línea
       if (e.key === 'Enter' && lineBreaks >= 4) {
         e.preventDefault();
       }
@@ -180,20 +177,16 @@
       let text = textBox.innerText;
       const lines = text.split('\n');
 
-      // Limitar saltos de línea
       if (lines.length > 5) {
         text = lines.slice(0, 5).join('\n');
       }
 
-      // Limitar caracteres
       if (text.length > 150) {
         text = text.slice(0, 150);
       }
 
-      // Restaurar contenido limpio si se excedió
       textBox.innerText = text;
 
-      // Restaurar cursor al final
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(textBox);
